@@ -1,7 +1,7 @@
 import { Directive, HostBinding, HostListener } from '@angular/core';
 
 @Directive({
-  selector: 'input[rainbowText]',
+  selector: 'input[type="text"][rainbowText]',
   standalone: true
 })
 export class RainbowTextDirective {
