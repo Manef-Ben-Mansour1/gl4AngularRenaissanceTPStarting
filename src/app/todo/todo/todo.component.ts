@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Todo } from '../model/todo';
+import { Todo, TodoStatus } from '../model/todo';
 import { TodoService } from '../service/todo.service';
 
 import { FormsModule } from '@angular/forms';
@@ -30,5 +30,14 @@ export class TodoComponent {
 
   deleteTodo(todo: Todo) {
     this.todoService.deleteTodo(todo);
+  }
+  
+  changerTodoStatus(todo: Todo) {
+    this.todoService.changerTodoStatus(todo);
+  }
+  getTodosByStatus(status: TodoStatus) {
+    console.log(status);
+    console.log(this.todoService.getTodosByStatus(status));
+    return this.todoService.getTodosByStatus(status);
   }
 }

@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { Todo } from '../model/todo';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Todo, TodoStatus } from '../model/todo';
 import { LoggerService } from '../../services/logger.service';
 
 let n = 1;
@@ -10,7 +10,17 @@ let n = 1;
 export class TodoService {
   private loggerService = inject(LoggerService);
 
-  private todos: Todo[] = [];
+  todos = signal<Todo[]>([]);
+
+  private waiting = computed(() =>
+    this.todos().filter((todo) => todo.status === 'waiting')
+  );
+  private inProgress = computed(() =>
+    this.todos().filter((todo) => todo.status === 'in progress')
+  );
+  private done = computed(() =>
+    this.todos().filter((todo) => todo.status === 'done')
+  );
 
   /** Inserted by Angular inject() migration for backwards compatibility */
   constructor(...args: unknown[]);
@@ -22,7 +32,13 @@ export class TodoService {
    * @returns Todo[]
    */
   getTodos(): Todo[] {
-    return this.todos;
+    return this.todos();
+  }
+
+  getTodosByStatus(status: TodoStatus): Todo[] {
+    return status==='waiting'?
+    this.waiting():status==='in progress'?
+    this.inProgress():this.done();
   }
 
   /**
@@ -32,7 +48,7 @@ export class TodoService {
    *
    */
   addTodo(todo: Todo): void {
-    this.todos.push(todo);
+    this.todos.update((todos) => [...todos, todo]);
   }
 
   /**
@@ -42,9 +58,9 @@ export class TodoService {
    * @returns boolean
    */
   deleteTodo(todo: Todo): boolean {
-    const index = this.todos.indexOf(todo);
+    const index = this.todos().indexOf(todo);
     if (index > -1) {
-      this.todos.splice(index, 1);
+      this.todos.update((todos) => todos.filter((td) => td !== todo));
       return true;
     }
     return false;
@@ -56,4 +72,13 @@ export class TodoService {
   logTodos() {
     this.loggerService.logger(this.todos);
   }
+
+  changerTodoStatus(todo: Todo) {
+    const nouveauStatus = todo.status === 'waiting' ? 'in progress' : 'done';
+   
+      this.todos.update((todos) =>
+        todos.map((td) => (td === todo ? { ...td, status: nouveauStatus } : td))
+      ); 
+  }
+
 }

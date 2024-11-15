@@ -1,18 +1,77 @@
-<div class="row">
-  <div class="col">
-    <ol class="list-group">
-      @for (todo of todos; track todo) {
-        <li class="list-group-item">
-          {{todo.name}} : {{todo.content}}
-          <i (click)="deleteTodo(todo)" class="fa fa-trash" aria-hidden="true"></i>
-        </li>
-      }
-    </ol>
-  </div>
+
+<div class="row mt-3">
   <div class="col">
     name: <input [(ngModel)]="todo.name" type="text" class="form-control">
     content: <input [(ngModel)]="todo.content" type="text" class="form-control">
     <button (click)="addTodo()" [disabled]="!todo.name.trim() || !todo.content.trim()"
     class="btn btn-primary m-2">add</button>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card bg-secondary mb-3" style="min-height: 30vh;">
+      <div class="card-header">Waiting</div>
+      <div class="card-body">
+        <ul class="list-group">
+          @for (todo of getTodosByStatus('waiting'); track todo) {
+            <li class="list-group-item">
+              {{ todo.name }} : {{ todo.content }}
+              <i
+                (click)="deleteTodo(todo)"
+                class="fa fa-trash"
+                aria-hidden="true"
+              ></i>
+              <i
+               (click)="changerTodoStatus(todo)" 
+              class="fa fa-arrow-right margin-icon"
+              aria-hidden="true">
+              </i> 
+            </li>}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-warning mb-3" style="min-height: 30vh; background-color: #fff3cd;">
+      <div class="card-header">In Progress</div>
+      <div class="card-body">
+        <ul class="list-group">
+          @for (todo of getTodosByStatus('in progress'); track todo) {
+            <li class="list-group-item">
+              {{ todo.name }} : {{ todo.content }}
+              <i
+                (click)="deleteTodo(todo)"
+                class="fa fa-trash"
+                aria-hidden="true"
+              ></i>
+              <i
+              (click)="changerTodoStatus(todo)" 
+             class="fa fa-arrow-right margin-icon"
+             aria-hidden="true">
+             </i>
+            </li>}
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-success text-white mb-3" style="min-height: 30vh; background-color: #d4edda;">
+      <div class="card-header">Done</div>
+      <div class="card-body">
+        <ul class="list-group">
+          @for (todo of getTodosByStatus('done'); track todo) {
+            <li class="list-group-item">
+              {{ todo.name }} : {{ todo.content }}
+              <i
+                (click)="deleteTodo(todo)"
+                class="fa fa-trash"
+                aria-hidden="true"
+              ></i>
+            </li>}
+         
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
