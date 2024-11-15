@@ -51,6 +51,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('token');
+    this.userSignal.set(null);
+    localStorage.removeItem(CONSTANTES.user_key);
   }
 }
