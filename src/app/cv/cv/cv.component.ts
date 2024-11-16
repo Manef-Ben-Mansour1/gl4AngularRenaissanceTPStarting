@@ -26,7 +26,7 @@ export class CvComponent {
   private toastr = inject(ToastrService);
   private cvService = inject(CvService);
 
-  cvs = signal<Cv[]>([]);
+  cvs: Cv[] = [];
 
   selectedCv = signal<Cv | null>(null);
 
@@ -35,10 +35,10 @@ export class CvComponent {
   constructor() {
     this.cvService.getCvs().subscribe({
       next: (cvs) => {
-        this.cvs.set(cvs); 
+        this.cvs = cvs;
       },
       error: () => {
-        this.cvs.set(this.cvService.getFakeCvs());
+        this.cvs = this.cvService.getFakeCvs();
         this.toastr.error(`
           Attention!! Les données sont fictives, problème avec le serveur.
           Veuillez contacter l'admin.`);
