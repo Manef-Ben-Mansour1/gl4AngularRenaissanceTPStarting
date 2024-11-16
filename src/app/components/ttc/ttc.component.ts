@@ -12,7 +12,7 @@ export class TtcComponent {
 
   prix = signal<number>(0);
   quantite = signal<number>(1);
-  tva = signal<number>(0);
+  tva = signal<number>(18);
   prixUnitaire = computed(() => this.prix() + (this.prix() * this.tva()) / 100);
   remise = computed(() => {
     const prixAvantRemise=this.prixUnitaire()*this.quantite();
