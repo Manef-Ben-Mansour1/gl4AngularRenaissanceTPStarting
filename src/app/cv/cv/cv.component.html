@@ -3,10 +3,32 @@
     <div class="alert alert-warning">
       {{ date | date : "full" | uppercase }}
     </div>
-      <app-list [cvs]="cvs$ | async"></app-list>
+
+    <!-- Boutons pour sélectionner Juniors ou Seniors -->
+    <div>
+      <button
+        class="btn btn-primary m-2"
+        [class.active]="activeTab === 'junior'"
+        (click)="changeTab('junior')"
+      >
+        Juniors
+      </button>
+      <button
+        class="btn btn-secondary m-2"
+        [class.active]="activeTab === 'senior'"
+        (click)="changeTab('senior')"
+      >
+        Seniors
+      </button>
     </div>
+
+    <!-- Liste filtrée en fonction de l'onglet actif -->
+    <app-list [cvs]="filteredCvs"></app-list>
+  </div>
+
   <div class="col">
     <app-cv-card [cv]="selectedCv$ | async"></app-cv-card>
   </div>
 </div>
+
 <app-embauche></app-embauche>
