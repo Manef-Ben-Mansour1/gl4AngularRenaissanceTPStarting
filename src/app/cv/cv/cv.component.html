@@ -31,8 +31,7 @@
       </button>
     </div>
 
-    <!-- List Component displaying filtered CVs -->
-    <app-list [cvs]="filteredCvs"></app-list>
+    <app-list [cvs]="filteredCvs" (cvSelected)="selectCv($event)"></app-list>
   </div>
 
   <div class="col">

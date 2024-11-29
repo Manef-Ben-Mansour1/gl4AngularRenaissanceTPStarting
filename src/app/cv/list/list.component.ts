@@ -8,4 +8,10 @@ import { Cv } from "../model/cv";
 })
 export class ListComponent {
   @Input() cvs: Cv[] | null = [];
+  @Output() cvSelected = new EventEmitter<Cv>(); // Emit selected CV to parent
+
+  // Method to emit the selected CV
+  selectCv(cv: Cv): void {
+    this.cvSelected.emit(cv); // Emit the selected CV to the parent component (CvComponent)
+  }
 }

@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { Cv } from "../model/cv";
-import { Observable, of } from "rxjs";
+import { BehaviorSubject, Observable, of } from "rxjs";
 import { CvService } from "../services/cv.service";
 import { ToastrService } from "ngx-toastr";
 
@@ -14,8 +14,9 @@ export class CvComponent {
   searchQuery: string = ''; // Current search query
   allCvs: Cv[] = []; // All CVs fetched from the service
   filteredCvs: Cv[] = []; // CVs filtered by search and tab
-  selectedCv$: Observable<Cv> = new Observable<Cv>(); // Observable for selected CV
+  selectedCv$: BehaviorSubject<Cv | null> = new BehaviorSubject<Cv | null>(null); // Observable for selected CV
   date = new Date();
+
   constructor(
     private cvService: CvService,
     private toastr: ToastrService
@@ -57,6 +58,6 @@ export class CvComponent {
 
   // Set the selected CV (you can call this method when a user selects a CV)
   selectCv(cv: Cv): void {
-    this.selectedCv$ = of(cv); // Emit the selected CV
+    this.selectedCv$.next(cv); // Update the selected CV
   }
 }
