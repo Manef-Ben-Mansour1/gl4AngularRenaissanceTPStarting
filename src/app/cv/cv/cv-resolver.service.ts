@@ -1,16 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { CvService } from '../services/cv.service';
 import { Cv } from '../model/cv';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CvResolver implements Resolve<Cv[]> {
+export class CvResolver implements Resolve<Cv[] | null> {
   constructor(private cvService: CvService) {}
 
-  resolve(): Observable<Cv[]> {
-    return this.cvService.getCvs();
+  resolve(): Observable<Cv[] | null> {
+    return this.cvService.getCvs().pipe(
+      catchError(() => {
+        return of(null);
+      })
+    );;
   }
 }
