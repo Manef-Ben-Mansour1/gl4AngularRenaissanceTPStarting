@@ -4,25 +4,34 @@
       {{ date | date : "full" | uppercase }}
     </div>
 
-    <!-- Boutons pour sélectionner Juniors ou Seniors -->
+    <!-- Autocomplete -->
+    <app-autocomplete (search)="onSearch($event)"></app-autocomplete>
+
+    <!-- Tabs for Junior and Senior -->
     <div>
       <button
-        class="btn btn-primary m-2"
-        [class.active]="activeTab === 'junior'"
+        class="btn m-2"
+        [ngClass]="{
+          'btn-primary': activeTab === 'junior', 
+          'btn-white': activeTab !== 'junior'
+        }"
         (click)="changeTab('junior')"
       >
         Juniors
       </button>
       <button
-        class="btn btn-secondary m-2"
-        [class.active]="activeTab === 'senior'"
+        class="btn m-2"
+        [ngClass]="{
+          'btn-primary': activeTab === 'senior', 
+          'btn-white': activeTab !== 'senior'
+        }"
         (click)="changeTab('senior')"
       >
         Seniors
       </button>
     </div>
 
-    <!-- Liste filtrée en fonction de l'onglet actif -->
+    <!-- List Component displaying filtered CVs -->
     <app-list [cvs]="filteredCvs"></app-list>
   </div>
 

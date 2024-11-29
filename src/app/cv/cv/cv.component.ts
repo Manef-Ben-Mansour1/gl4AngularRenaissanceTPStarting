@@ -1,61 +1,62 @@
 import { Component } from "@angular/core";
 import { Cv } from "../model/cv";
-import { LoggerService } from "../../services/logger.service";
-import { ToastrService } from "ngx-toastr";
+import { Observable, of } from "rxjs";
 import { CvService } from "../services/cv.service";
-import { catchError, Observable, of } from "rxjs";
+import { ToastrService } from "ngx-toastr";
 
 @Component({
-  selector: 'app-cv',
-  templateUrl: './cv.component.html',
-  styleUrls: ['./cv.component.css'],
+  selector: "app-cv",
+  templateUrl: "./cv.component.html",
+  styleUrls: ["./cv.component.css"],
 })
 export class CvComponent {
-  cvs$: Observable<Cv[]> = this.cvService.getCvs();
-  filteredCvs: Cv[] = []; // Liste filtrée à afficher
-  activeTab: 'junior' | 'senior' = 'junior'; // Onglet actif
-  selectedCv$: Observable<Cv> = this.cvService.selectCv$;
+  activeTab: 'junior' | 'senior' = 'junior'; // Current tab
+  searchQuery: string = ''; // Current search query
+  allCvs: Cv[] = []; // All CVs fetched from the service
+  filteredCvs: Cv[] = []; // CVs filtered by search and tab
+  selectedCv$: Observable<Cv> = new Observable<Cv>(); // Observable for selected CV
   date = new Date();
-
   constructor(
-    private logger: LoggerService,
-    private toastr: ToastrService,
-    private cvService: CvService
+    private cvService: CvService,
+    private toastr: ToastrService
   ) {
-    // Gestion des erreurs et récupération des CVs
-    this.cvs$ = this.cvService.getCvs().pipe(
-      catchError(() => {
-        this.toastr.error(`
-          Attention!! Les données sont fictives, problème avec le serveur.
-          Veuillez contacter l'admin.`);
-        return of(this.cvService.getFakeCvs());
-      })
-    );
-
-    // Logger et message de bienvenue
-    this.logger.logger('je suis le cvComponent');
-    this.toastr.info('Bienvenu dans notre CvTech');
-
-    // Appliquer un filtre initial pour les juniors
-    this.cvs$.subscribe((cvs) => {
-      this.filterCvs(cvs);
+    // Fetch all CVs on initialization
+    this.cvService.getCvs().subscribe({
+      next: (cvs) => {
+        this.allCvs = cvs;
+        this.updateFilteredCvs(); // Apply initial filters
+      },
+      error: () => this.toastr.error("Erreur lors de la récupération des CVs."),
     });
   }
 
-  // Changer l'onglet actif et appliquer un filtre
+  // Change the active tab and update the filtered CVs
   changeTab(tab: 'junior' | 'senior'): void {
     this.activeTab = tab;
-    this.cvs$.subscribe((cvs) => {
-      this.filterCvs(cvs);
+    this.updateFilteredCvs();
+  }
+
+  // Update the search query and filtered CVs
+  onSearch(query: string): void {
+    this.searchQuery = query;
+    this.updateFilteredCvs();
+  }
+
+  // Apply filtering based on the active tab and search query
+  private updateFilteredCvs(): void {
+    this.filteredCvs = this.allCvs.filter((cv) => {
+      const matchesTab =
+        this.activeTab === 'junior' ? cv.age < 40 : cv.age >= 40;
+      const matchesSearch =
+        this.searchQuery === '' ||
+        cv.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        cv.firstname.toLowerCase().includes(this.searchQuery.toLowerCase());
+      return matchesTab && matchesSearch;
     });
   }
 
-  // Appliquer le filtre en fonction de l'onglet actif
-  filterCvs(cvs: Cv[]): void {
-    if (this.activeTab === 'junior') {
-      this.filteredCvs = cvs.filter((cv) => cv.age < 40);
-    } else {
-      this.filteredCvs = cvs.filter((cv) => cv.age >= 40);
-    }
+  // Set the selected CV (you can call this method when a user selects a CV)
+  selectCv(cv: Cv): void {
+    this.selectedCv$ = of(cv); // Emit the selected CV
   }
 }

@@ -131,4 +131,17 @@ export class CvService {
   selectCv(cv: Cv) {
     this.#selectCvSuject$.next(cv);
   }
+
+  searchCvs(name: string): Observable<Cv[]> {
+    const params = new HttpParams().set(
+      "filter",
+      JSON.stringify({ where: { name: { like: `%${name}%` } } })
+    );
+    return this.http.get<Cv[]>(API.cv, { params });
+  }
+  onCvSelected(cv: Cv): void {
+    console.log("CV sélectionné :", cv);
+  }
+
+  
 }

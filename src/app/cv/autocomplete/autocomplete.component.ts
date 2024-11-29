@@ -1,7 +1,6 @@
-import { Component, inject } from "@angular/core";
-import { FormBuilder, AbstractControl } from "@angular/forms";
-import { debounceTime, distinctUntilChanged, switchMap, tap } from "rxjs";
-import { CvService } from "../services/cv.service";
+import { Component, EventEmitter, Output } from "@angular/core";
+import { FormControl } from "@angular/forms";
+import { debounceTime, distinctUntilChanged } from "rxjs";
 
 @Component({
   selector: "app-autocomplete",
@@ -9,10 +8,17 @@ import { CvService } from "../services/cv.service";
   styleUrls: ["./autocomplete.component.css"],
 })
 export class AutocompleteComponent {
-  formBuilder = inject(FormBuilder);
-  cvService = inject(CvService);
-  get search(): AbstractControl {
-    return this.form.get("search")!;
+  @Output() search = new EventEmitter<string>(); // Emits the search query
+
+  searchControl = new FormControl(); // Reactive form control for the input
+
+  constructor() {
+    // Listen for input changes and emit the value
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300), // Wait 300ms after the last input
+        distinctUntilChanged() // Emit only if the value changes
+      )
+      .subscribe((query) => this.search.emit(query || '')); // Emit the search query
   }
-  form = this.formBuilder.group({ search: [""] });
 }
