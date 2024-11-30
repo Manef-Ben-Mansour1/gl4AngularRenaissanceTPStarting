@@ -20,8 +20,9 @@ export class ProductsComponent {
   public products$!: Observable<Product[]>;
   private settings$ = new BehaviorSubject<Settings>({ limit: 12, skip: 0 });
   public hasMoreProducts = true;
+  constructor(private productService: ProductService) {}
 
-  constructor(private productService: ProductService) {
+  ngOnInit(): void {
     this.products$ = this.settings$.pipe(
       takeWhile(() => this.hasMoreProducts),
       concatMap((settings) =>
