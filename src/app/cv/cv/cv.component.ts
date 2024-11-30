@@ -21,7 +21,6 @@ export class CvComponent {
     private cvService: CvService,
     private toastr: ToastrService
   ) {
-    // Fetch all CVs on initialization
     this.cvService.getCvs().subscribe({
       next: (cvs) => {
         this.allCvs = cvs;
@@ -31,19 +30,16 @@ export class CvComponent {
     });
   }
 
-  // Change the active tab and update the filtered CVs
   changeTab(tab: 'junior' | 'senior'): void {
     this.activeTab = tab;
     this.updateFilteredCvs();
   }
 
-  // Update the search query and filtered CVs
   onSearch(query: string): void {
     this.searchQuery = query;
     this.updateFilteredCvs();
   }
 
-  // Apply filtering based on the active tab and search query
   private updateFilteredCvs(): void {
     this.filteredCvs = this.allCvs.filter((cv) => {
       const matchesTab =
@@ -51,12 +47,14 @@ export class CvComponent {
       const matchesSearch =
         this.searchQuery === '' ||
         cv.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cv.firstname.toLowerCase().includes(this.searchQuery.toLowerCase());
+        cv.firstname.toLowerCase().includes(this.searchQuery.toLowerCase())||
+        (cv.firstname + " " + cv.name).toLowerCase().includes(this.searchQuery.toLowerCase()); // Recherche dans le prénom + nom
+
+        ;
       return matchesTab && matchesSearch;
     });
   }
 
-  // Set the selected CV (you can call this method when a user selects a CV)
   selectCv(cv: Cv): void {
     this.selectedCv$.next(cv); // Update the selected CV
   }

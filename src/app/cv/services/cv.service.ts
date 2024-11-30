@@ -1,23 +1,25 @@
 import { Injectable } from "@angular/core";
 import { Cv } from "../model/cv";
-import { Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { API } from "../../../config/api.config";
+import { tap } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
 })
 export class CvService {
-  private cvs: Cv[] = [];
-  /**
-   * Le subject permettant de créer le flux des cvs sélectionnés
-   */
-  #selectCvSuject$ = new Subject<Cv>();
-  /**
-   * Le flux des cvs sélectionnés
-   */
+  private cvsSubject = new BehaviorSubject<Cv[]>([]); // Stocke les CVs récupérés
+  cvs$: Observable<Cv[]> = this.cvsSubject.asObservable(); // Expose les CVs comme observable
+
+  private cvs: Cv[] = []; // Liste fictive locale
+
+  // Subject pour le flux des CVs sélectionnés
+  #selectCvSuject$ = new BehaviorSubject<Cv | null>(null);
   selectCv$ = this.#selectCvSuject$.asObservable();
+
   constructor(private http: HttpClient) {
+    // Initialisation des CVs fictifs
     this.cvs = [
       new Cv(1, "aymen", "sellaouti", "teacher", "as.jpg", "1234", 40),
       new Cv(2, "skander", "sellaouti", "enfant", "       ", "1234", 4),
@@ -25,113 +27,66 @@ export class CvService {
   }
 
   /**
-   *
-   * Retourne un liste fictive de cvs
-   *
-   * @returns CV[]
-   *
+   * Charger les CVs depuis l'API et les stocker dans le BehaviorSubject.
+   * @returns Observable<Cv[]>
    */
-  getFakeCvs(): Cv[] {
-    return this.cvs;
+  loadCvs(): Observable<Cv[]> {
+    return this.http.get<Cv[]>(API.cv).pipe(
+      tap((cvs) => this.cvsSubject.next(cvs)) // Met à jour les CVs dans le BehaviorSubject
+    );
   }
 
   /**
-   *
-   * Retourne la liste des cvs de l'API
-   *
-   * @returns CV[]
-   *
+   * Retourner la liste des CVs stockés dans le BehaviorSubject.
+   * @returns Observable<Cv[]>
    */
   getCvs(): Observable<Cv[]> {
     return this.http.get<Cv[]>(API.cv);
   }
 
   /**
-   *
-   * supprime un cv par son id de l'API
-   *
-   * @param id: number
-   * @returns CV[]
-   *
+   * Ajouter un CV au flux des CVs sélectionnés.
+   * @param cv : Cv
+   */
+  selectCv(cv: Cv): void {
+    this.#selectCvSuject$.next(cv); // Met à jour le CV sélectionné
+  }
+
+  /**
+   * Supprimer un CV par son id.
+   * @param id : number
+   * @returns Observable<any>
    */
   deleteCvById(id: number): Observable<any> {
-    return this.http.delete<any>(API.cv + id);
-  }
-
-  addCv(cv: Cv): Observable<Cv> {
-    return this.http.post<any>(API.cv, cv);
-  }
-
-  /**
-   *
-   * Retourne un cv par son id de l'API
-   *
-   * @param id: number
-   * @returns CV[]
-   *
-   */
-  getCvById(id: number): Observable<Cv> {
-    return this.http.get<Cv>(API.cv + id);
+    return this.http.delete<any>(`${API.cv}/${id}`).pipe(
+      tap(() => {
+        // Supprime localement après la suppression sur le serveur
+        const updatedCvs = this.cvsSubject.value.filter((cv) => cv.id !== id);
+        this.cvsSubject.next(updatedCvs);
+      })
+    );
   }
 
   /**
-   *
-   * Cherche un cv avec son id dans lai liste fictive de cvs
-   *
-   * @param id
-   * @returns Cv | null
-   */
-  findCvById(id: number): Cv | null {
-    return this.cvs.find((cv) => cv.id == id) ?? null;
-  }
-
-  /**
-   *
-   * Supprime un cv s'il le trouve
-   *
+   * Ajouter un nouveau CV via l'API.
    * @param cv : Cv
-   * @returns boolean
+   * @returns Observable<Cv>
    */
-  deleteCv(cv: Cv): boolean {
-    const index = this.cvs.indexOf(cv);
-    if (index > -1) {
-      this.cvs.splice(index, 1);
-      return true;
-    }
-    return false;
+  addCv(cv: Cv): Observable<Cv> {
+    return this.http.post<Cv>(API.cv, cv).pipe(
+      tap((newCv) => {
+        // Ajouter localement après ajout sur le serveur
+        const updatedCvs = [...this.cvsSubject.value, newCv];
+        this.cvsSubject.next(updatedCvs);
+      })
+    );
   }
 
   /**
-   * Recherche les cvs dont le name contient la chaine name passée en paramètre
+   * Rechercher des CVs par nom dans le BehaviorSubject ou via l'API.
    * @param name : string
-   * @returns cvs Cv[]
+   * @returns Observable<Cv[]>
    */
-  selectByName(name: string) {
-    const search = `{"where":{"name":{"like":"%${name}%"}}}`;
-    const params = new HttpParams().set("filter", search);
-    return this.http.get<any>(API.cv, { params });
-  }
-  /**
-   * Recherche les cvs dont la valeur est égale à la chaine passée en paramètre
-   * @param property : string, la propriété sur laquelle on va requeter
-   * @param value : string, la valeur de la propriété sur laquelle on va requeter
-   * @returns cvs Cv[]
-   */
-  selectByProperty(property: string, value: string) {
-    const search = `{"where":{"${property}":"${value}"}}`;
-    const params = new HttpParams().set("filter", search);
-    return this.http.get<Cv[]>(API.cv, { params });
-  }
-
-  /**
-   * Permet d'ajouter un cv au flux des cvs sélectionnés
-   *
-   * @param cv : Le cv à ajouter dans le flux des cvs sélectionnés
-   */
-  selectCv(cv: Cv) {
-    this.#selectCvSuject$.next(cv);
-  }
-
   searchCvs(name: string): Observable<Cv[]> {
     const params = new HttpParams().set(
       "filter",
@@ -139,9 +94,25 @@ export class CvService {
     );
     return this.http.get<Cv[]>(API.cv, { params });
   }
-  onCvSelected(cv: Cv): void {
-    console.log("CV sélectionné :", cv);
+
+  /**
+   * Rechercher des CVs localement en fonction d'une propriété.
+   * @param property : string
+   * @param value : string
+   * @returns Cv[]
+   */
+  selectByProperty(property: string, value: string): Cv[] {
+    return this.cvsSubject.value.filter(
+      (cv) => cv[property as keyof Cv] === value
+    );
   }
 
-  
+  /**
+   * Retourner un CV par son ID.
+   * @param id : number
+   * @returns Observable<Cv>
+   */
+  getCvById(id: number): Observable<Cv> {
+    return this.http.get<Cv>(`${API.cv}/${id}`);
+  }
 }
