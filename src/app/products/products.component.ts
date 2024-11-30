@@ -17,32 +17,32 @@ import { Settings } from './dto/product-settings.dto';
   styleUrls: ['./products.component.css'],
 })
 export class ProductsComponent {
-  public products$!: Observable<Product[]>;
   private settings$ = new BehaviorSubject<Settings>({ limit: 12, skip: 0 });
   public hasMoreProducts = true;
+  public products$: Observable<Product[]> = this.settings$.pipe(
+    takeWhile(() => this.hasMoreProducts),
+    concatMap((settings) =>
+      this.productService.getProducts(settings).pipe(
+        map((response) => {
+          if (response.products.length < settings.limit) {
+            this.hasMoreProducts = false;
+          }
+          return response.products;
+        })
+      )
+    ),
+    scan(
+      (allProducts: Product[], newProducts: Product[]) => [
+        ...allProducts,
+        ...newProducts,
+      ],
+      [] as Product[]
+    )
+  );;
+
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
-    this.products$ = this.settings$.pipe(
-      takeWhile(() => this.hasMoreProducts),
-      concatMap((settings) =>
-        this.productService.getProducts(settings).pipe(
-          map((response) => {
-            if (response.products.length < settings.limit) {
-              this.hasMoreProducts = false;
-            }
-            return response.products;
-          })
-        )
-      ),
-      scan(
-        (allProducts: Product[], newProducts: Product[]) => [
-          ...allProducts,
-          ...newProducts,
-        ],
-        [] as Product[]
-      )
-    );
   }
 
   loadMore(): void {

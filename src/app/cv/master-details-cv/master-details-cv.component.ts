@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop'
 import { CvService } from '../services/cv.service';
 import { Cv } from '../model/cv';
 import { Router, ActivatedRoute } from '@angular/router';
-import { catchError, Observable, of, switchMap } from 'rxjs';
+import { catchError, Observable, of, pipe, switchMap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { APP_ROUTES } from 'src/config/routes.config';
 @Component({
@@ -26,6 +27,13 @@ export class MasterDetailsCvComponent implements OnInit {
         return of(this.cvService.getFakeCvs());
       })
     );
+    cvService.selectCv$
+    .pipe(
+      takeUntilDestroyed()
+    )
+    .subscribe((cv) => {
+      this.goToCvDetails(cv)
+    })
   }
   ngOnInit() {}
   goToCvDetails(cv: Cv) {
