@@ -10,11 +10,11 @@ import { ToastrService } from "ngx-toastr";
   styleUrls: ["./cv.component.css"],
 })
 export class CvComponent {
-  activeTab: 'junior' | 'senior' = 'junior'; // Current tab
-  searchQuery: string = ''; // Current search query
-  allCvs: Cv[] = []; // All CVs fetched from the service
-  filteredCvs: Cv[] = []; // CVs filtered by search and tab
-  selectedCv$: BehaviorSubject<Cv | null> = new BehaviorSubject<Cv | null>(null); // Observable for selected CV
+  activeTab: 'junior' | 'senior' = 'junior';
+  searchQuery: string = ''; 
+  allCvs: Cv[] = []; 
+  filteredCvs: Cv[] = []; 
+  selectedCv$: BehaviorSubject<Cv | null> = new BehaviorSubject<Cv | null>(null); 
   date = new Date();
 
   constructor(
@@ -24,7 +24,7 @@ export class CvComponent {
     this.cvService.getCvs().subscribe({
       next: (cvs) => {
         this.allCvs = cvs;
-        this.updateFilteredCvs(); // Apply initial filters
+        this.updateFilteredCvs(); 
       },
       error: () => this.toastr.error("Erreur lors de la récupération des CVs."),
     });
