@@ -8,6 +8,7 @@ import { LoginComponent } from "./auth/login/login.component";
 import { NF404Component } from "./components/nf404/nf404.component";
 import { RhComponent } from "./optimizationPattern/rh/rh.component";
 import { CvResolver } from "./cv/cv/cv-resolver.service";
+import { MyPreloadingStrategy } from "./my-preloading-strategy.service";
 
 const routes: Route[] = [
   { path: "login", component: LoginComponent },
@@ -37,7 +38,7 @@ const routes: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: MyPreloadingStrategy })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
