@@ -7,10 +7,10 @@ import { Cv } from '../model/cv';
   styleUrls: ['./list.component.css'],
 })
 export class ListComponent {
-  @Input() cvs: Cv[] | null = [];
-  @Output() selectCv = new EventEmitter<Cv>();
+  @Input() cvs: Cv[] | null = []; // Accept null or Cv array for safer handling
+  @Output() cvSelected = new EventEmitter<Cv>(); // Rename the event to avoid conflicts
 
   onSelect(cv: Cv) {
-    this.selectCv.emit(cv);
+    this.cvSelected.emit(cv); // Emit the selected CV object
   }
 }
