@@ -3,10 +3,40 @@
     <div class="alert alert-warning">
       {{ date | date : "full" | uppercase }}
     </div>
-      <app-list [cvs]="cvs$ | async"></app-list>
+
+    <!-- Autocomplete -->
+    <app-autocomplete (search)="onSearch($event)"></app-autocomplete>
+
+    <!-- Tabs for Junior and Senior -->
+    <div>
+      <button
+        class="btn m-2"
+        [ngClass]="{
+          'btn-primary': activeTab === 'junior', 
+          'btn-white': activeTab !== 'junior'
+        }"
+        (click)="changeTab('junior')"
+      >
+        Juniors
+      </button>
+      <button
+        class="btn m-2"
+        [ngClass]="{
+          'btn-primary': activeTab === 'senior', 
+          'btn-white': activeTab !== 'senior'
+        }"
+        (click)="changeTab('senior')"
+      >
+        Seniors
+      </button>
     </div>
+
+    <app-list [cvs]="filteredCvs" (cvSelected)="selectCv($event)"></app-list>
+  </div>
+
   <div class="col">
     <app-cv-card [cv]="selectedCv$ | async"></app-cv-card>
   </div>
 </div>
+
 <app-embauche></app-embauche>
