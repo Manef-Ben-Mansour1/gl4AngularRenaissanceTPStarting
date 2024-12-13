@@ -22,6 +22,24 @@
       Cette Cin est invalide
     </div>
   }
+  @if (
+   form.get('cin')?.errors?.['cinNotUnique'] ?? false
+    ) {
+    <div
+      class="alert alert-danger"
+      >
+      Cette Cin existe déja
+    </div>
+  }
+  @if (
+    form.errors && form.errors['cinAgeCorrelation'] && cin?.touched && age?.touched
+     ) {
+     <div
+       class="alert alert-danger"
+       >
+       Cette Cin ne correspond pas à l'age
+     </div>
+   }
   Job: <input type="text" class="form-control" formControlName="job" /> Path:
   <input type="text" class="form-control" formControlName="path" />
 
@@ -29,4 +47,3 @@
     add cv
   </button>
 </form>
-{{ form.errors | json }}

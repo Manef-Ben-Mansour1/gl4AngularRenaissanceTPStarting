@@ -6,6 +6,7 @@ import { ToastrService } from "ngx-toastr";
 import { APP_ROUTES } from "src/config/routes.config";
 import { Cv } from "../model/cv";
 import { JsonPipe } from "@angular/common";
+import { CinValidatorService } from "../services/cin-validator.service";
 
 @Component({
     selector: "app-add-cv",
@@ -24,10 +25,10 @@ export class AddCvComponent {
   private toastr = inject(ToastrService);
   private formBuilder = inject(FormBuilder);
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
 
-  constructor() {}
+  constructor(
+    private cinValidator: CinValidatorService
+  ) {}
 
   form = this.formBuilder.group(
     {
@@ -39,6 +40,8 @@ export class AddCvComponent {
         "",
         {
           validators: [Validators.required, Validators.pattern("[0-9]{8}")],
+          asyncValidators: [this.cinValidator.checkCinUnique()],
+          updateOn: 'blur'
         },
       ],
       age: [
@@ -48,8 +51,22 @@ export class AddCvComponent {
         },
       ],
     },
+    {
+      validators: [this.cinValidator.validateCinAgeCorrelation()]
+    }
   );
 
+
+  ngOnInit() {
+    // Watch changes on `cin` and `age`, and trigger correlation validation
+    this.form.get('cin')?.valueChanges.subscribe(() => {
+      this.cinValidator.validateCinAgeCorrelation();
+    });
+
+    this.form.get('age')?.valueChanges.subscribe(() => {
+      this.cinValidator.validateCinAgeCorrelation();
+    });
+  }
   addCv() {
     this.cvService.addCv(this.form.value as Cv).subscribe({
       next: (cv) => {
