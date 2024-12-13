@@ -22,9 +22,19 @@
       Cette Cin est invalide
     </div>
   }
-  Job: <input type="text" class="form-control" formControlName="job" /> Path:
-  <input type="text" class="form-control" formControlName="path" />
-
+  Job: <input type="text" class="form-control" formControlName="job" />
+   <div>
+    Path:
+    <input
+      type="text"
+      class="form-control"
+      formControlName="path"
+      [disabled]="!path?.enabled"
+    />
+    <div *ngIf="path.disabled" class="alert alert-warning">
+      Le champ 'path' est désactivé pour les mineurs.
+    </div>
+  </div>
   <button [disabled]="form.invalid" class="btn btn-primary" (click)="addCv()">
     add cv
   </button>

@@ -8,15 +8,11 @@ import { Cv } from "../model/cv";
 import { JsonPipe } from "@angular/common";
 
 @Component({
-    selector: "app-add-cv",
-    templateUrl: "./add-cv.component.html",
-    styleUrls: ["./add-cv.component.css"],
-    standalone: true,
-    imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    JsonPipe
-],
+  selector: 'app-add-cv',
+  templateUrl: './add-cv.component.html',
+  styleUrls: ['./add-cv.component.css'],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, JsonPipe],
 })
 export class AddCvComponent {
   private cvService = inject(CvService);
@@ -24,31 +20,39 @@ export class AddCvComponent {
   private toastr = inject(ToastrService);
   private formBuilder = inject(FormBuilder);
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
+  constructor() {
+    // Surveiller les changements sur le champ 'age'
+    this.form.get('age')?.valueChanges.subscribe((age) => {
+      
+      if (age !== null && age < 18) {
+        this.path.disable(); // Désactiver si l'âge est < 18
+        this.path.setValue(''); // Réinitialiser le champ
+      } else if (age !== null && age >= 18) {
+        this.path.enable(); // Activer si l'âge est >= 18
+      }
+    });
+  }
 
-  constructor() {}
-
-  form = this.formBuilder.group(
-    {
-      name: ["", Validators.required],
-      firstname: ["", Validators.required],
-      path: [""],
-      job: ["", Validators.required],
-      cin: [
-        "",
-        {
-          validators: [Validators.required, Validators.pattern("[0-9]{8}")],
-        },
-      ],
-      age: [
-        0,
-        {
-          validators: [Validators.required],
-        },
-      ],
-    },
-  );
+  form = this.formBuilder.group({
+    name: ['', Validators.required],
+    firstname: ['', Validators.required],
+    path: this.formBuilder.control(
+      { value: '', disabled: true } // Désactivé par défaut
+    ),
+    job: ['', Validators.required],
+    cin: [
+      '',
+      {
+        validators: [Validators.required, Validators.pattern('[0-9]{8}')],
+      },
+    ],
+    age: [
+      0,
+      {
+        validators: [Validators.required],
+      },
+    ],
+  });
 
   addCv() {
     this.cvService.addCv(this.form.value as Cv).subscribe({
@@ -56,7 +60,7 @@ export class AddCvComponent {
         this.router.navigate([APP_ROUTES.cv]);
         this.toastr.success(`Le cv ${cv.firstname} ${cv.name}`);
       },
-      error: (err) => {
+      error: () => {
         this.toastr.error(
           `Une erreur s'est produite, Veuillez contacter l'admin`
         );
@@ -65,21 +69,21 @@ export class AddCvComponent {
   }
 
   get name(): AbstractControl {
-    return this.form.get("name")!;
+    return this.form.get('name')!;
   }
   get firstname() {
-    return this.form.get("firstname");
+    return this.form.get('firstname');
   }
   get age(): AbstractControl {
-    return this.form.get("age")!;
+    return this.form.get('age')!;
   }
   get job() {
-    return this.form.get("job");
+    return this.form.get('job');
   }
-  get path() {
-    return this.form.get("path");
+  get path(): AbstractControl {
+    return this.form.get('path')!;
   }
   get cin(): AbstractControl {
-    return this.form.get("cin")!;
+    return this.form.get('cin')!;
   }
 }
