@@ -19,17 +19,36 @@ export class AddCvComponent {
   private router = inject(Router);
   private toastr = inject(ToastrService);
   private formBuilder = inject(FormBuilder);
+  private STORAGE_KEY = 'addCvForm'; 
 
   constructor() {
+    const savedData = localStorage.getItem(this.STORAGE_KEY);
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      this.form.patchValue(parsedData);
+
+      const age = parsedData.age;
+      if (age && age >= 18) {
+        this.path.enable();
+      } else {
+        this.path.disable();
+        this.path.setValue(''); 
+      }
+    }
+
     // Surveiller les changements sur le champ 'age'
     this.form.get('age')?.valueChanges.subscribe((age) => {
-      
       if (age !== null && age < 18) {
-        this.path.disable(); // Désactiver si l'âge est < 18
-        this.path.setValue(''); // Réinitialiser le champ
+        this.path.disable(); 
+        this.path.setValue('');
       } else if (age !== null && age >= 18) {
-        this.path.enable(); // Activer si l'âge est >= 18
+        this.path.enable(); 
       }
+    });
+
+    // Surveiller les changements dans tout le formulaire
+    this.form.valueChanges.subscribe((value) => {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(value)); // Sauvegarder les données
     });
   }
 
@@ -59,6 +78,8 @@ export class AddCvComponent {
       next: (cv) => {
         this.router.navigate([APP_ROUTES.cv]);
         this.toastr.success(`Le cv ${cv.firstname} ${cv.name}`);
+        this.form.reset();
+        localStorage.removeItem(this.STORAGE_KEY);
       },
       error: () => {
         this.toastr.error(

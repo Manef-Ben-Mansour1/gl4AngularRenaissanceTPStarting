@@ -1,42 +1,40 @@
-<p>add-cv works!</p>
 <form [formGroup]="form">
-  Name:
-  <input type="text" class="form-control" formControlName="name" />
-  @if (form.get('name')?.errors && form.get('name')?.touched) {
-    <div
-      class="alert alert-danger"
-      >
-      Ce champ est obligatoire
-    </div>
-  }
-  Firstname:
-  <input type="text" class="form-control" formControlName="firstname" /> Age:
-  <input type="text" class="form-control" formControlName="age" /> Cin:
-  <input type="text" class="form-control" formControlName="cin" />
-  @if (
-    form.errors && form.errors['cinFirstCars'] && cin?.touched && age?.touched
-    ) {
-    <div
-      class="alert alert-danger"
-      >
-      Cette Cin est invalide
-    </div>
-  }
-  Job: <input type="text" class="form-control" formControlName="job" />
-   <div>
+  <div>
+    Name:
+    <input type="text" class="form-control" formControlName="name" />
+  </div>
+
+  <div>
+    Firstname:
+    <input type="text" class="form-control" formControlName="firstname" />
+  </div>
+
+  <div>
+    Age:
+    <input type="number" class="form-control" formControlName="age" />
+  </div>
+
+  <div>
+    Cin:
+    <input type="text" class="form-control" formControlName="cin" />
+  </div>
+
+  <div>
+    Job:
+    <input type="text" class="form-control" formControlName="job" />
+  </div>
+
+  <div>
     Path:
     <input
       type="text"
       class="form-control"
       formControlName="path"
-      [disabled]="!path?.enabled"
+      [disabled]="!path.enabled"
     />
-    <div *ngIf="path.disabled" class="alert alert-warning">
-      Le champ 'path' est désactivé pour les mineurs.
-    </div>
   </div>
+
   <button [disabled]="form.invalid" class="btn btn-primary" (click)="addCv()">
-    add cv
+    Add CV
   </button>
 </form>
-{{ form.errors | json }}
